@@ -137,6 +137,21 @@ check("coefficient decreasing in tau",
 check("modulus admissibility needs only log^2 n > 9 c_0 = 26.59...",
       mlog(mpf('1e5')) ** 2 > 9 * c0)
 
+# Corollary 1.3's chain is uniform in r: the only numeric step is
+#   11.4 * 2^(r/2) * log n > 1  for n >= 1e5, worst case r = 0.
+check("Cor 1.3 key step: 11.4 log(1e5) > 1 (worst case r = 0)",
+      mpf('11.4') * mlog(mpf('1e5')) > 1,
+      f"value {float(mpf('11.4') * mlog(mpf('1e5'))):.2f}")
+# and a witness that the SUPERSEDED table-dependent constant 0.072 was untenable:
+# C_Artin * Pi_r decreases to 0, and already dips below 0.072 at r = 12.
+_pi = Fraction(1)
+_odd = list(primerange(3, 200))
+for _t in range(12):
+    _pi *= 1 - Fraction(1, _odd[_t] - 1)
+_A12 = mpf('0.3739558136192023') * mpf(_pi.numerator) / mpf(_pi.denominator)
+check("C_Artin*Pi_12 < 0.072 (so no fixed positive constant can serve all r)",
+      _A12 < mpf('0.072'), f"value {float(_A12):.7f}")
+
 print()
 if FAILS:
     print(f"VERIFICATION FAILED on {len(FAILS)} check(s): {', '.join(FAILS)}")

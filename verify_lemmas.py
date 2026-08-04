@@ -152,6 +152,22 @@ _A12 = mpf('0.3739558136192023') * mpf(_pi.numerator) / mpf(_pi.denominator)
 check("C_Artin*Pi_12 < 0.072 (so no fixed positive constant can serve all r)",
       _A12 < mpf('0.072'), f"value {float(_A12):.7f}")
 
+# Proposition 7.4(ii) uses the effective divisor bound tau(m) <= C_4 m^(1/4) with
+# C_4 = 8.5.  The extremal ratio is attained at 2^5 3^3 5^2 7 . 11 . 13 = 21621600.
+_ext = 2 ** 5 * 3 ** 3 * 5 ** 2 * 7 * 11 * 13
+_tau_ext = 6 * 4 * 3 * 2 * 2 * 2          # tau(2^5 3^3 5^2 7 11 13)
+_ratio = mpf(_tau_ext) / mpf(_ext) ** mpf('0.25')
+check("tau(m)/m^(1/4) at the extremal m = 21621600 is 8.4470...",
+      abs(_ratio - mpf('8.44700')) < mpf('1e-3'), f"value {float(_ratio):.5f}")
+check("so tau(m) <= 8.5 m^(1/4) holds there", _ratio < mpf('8.5'))
+# spot-check the bound over a range of m
+_d = [0] * 200001
+for _i in range(1, 200001):
+    for _j in range(_i, 200001, _i):
+        _d[_j] += 1
+check("tau(m) <= 8.5 m^(1/4) for all m <= 200000",
+      all(_d[m] <= 8.5 * m ** 0.25 for m in range(1, 200001)))
+
 print()
 if FAILS:
     print(f"VERIFICATION FAILED on {len(FAILS)} check(s): {', '.join(FAILS)}")

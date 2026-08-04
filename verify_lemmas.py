@@ -15,8 +15,11 @@ together cover all the arithmetic in the paper:
   Lemma 2.5  the finite check over the primes below 285: min F = F(3) = log(3)/2,
              equality only at y = 3, and the NON-monotonicity witness
              F(11) > F(13).
-  Thm 1.1    the rebalanced constants: sqrt(9 c_0) = 5.15609... and
-             2 sqrt(9 c_0) + 1 = 11.3122... <= 11.4.
+  Thm 1.1    the rebalanced constants sqrt(9 c_0) = 5.15609..., and the
+             endpoint-corrected coefficient
+                 2 sqrt(9 c_0) + 2/(n^(1/8) tau^(1/2)) + 2 sqrt(9 c_0)/(sqrt(n) log n)
+             which is decreasing in n and in tau, hence at most its value at
+             n = 1e5, tau = 1, namely 10.7893... < 10.80 <= 11.4.
 
 Every check is an assertion; the script exits nonzero on any failure.
 
@@ -113,9 +116,24 @@ check("equality fails at y = 4 (so equality holds only at y = 3)",
 
 # ---------------------------------------------------------------- Thm 1.1 ----
 print("\nTheorem 1.1  (rebalanced constants)")
-check("sqrt(9 c_0) = 5.15609...", abs((9 * c0) ** mpf('0.5') - mpf('5.156085')) < mpf('1e-6'))
-check("2 sqrt(9 c_0) + 1 = 11.3122... <= 11.4",
-      2 * (9 * c0) ** mpf('0.5') + 1 <= mpf('11.4'))
+A = (9 * c0) ** mpf('0.5')
+check("sqrt(9 c_0) = 5.15609...", abs(A - mpf('5.156085')) < mpf('1e-6'))
+
+# endpoint-corrected coefficient of Theorem 1.1 (see eq. for |R_k - S_k n| in the proof):
+#   2 sqrt(9c0) + 2/(n^{1/8} tau^{1/2}) + 2 sqrt(9c0)/(sqrt(n) log n)
+coeff = lambda n, tau: 2 * A + 2 / (n ** mpf('0.125') * tau ** mpf('0.5')) \
+                       + 2 * A / (n ** mpf('0.5') * mlog(n))
+worst = coeff(mpf('1e5'), mpf(1))
+check("endpoint-corrected coefficient at n=1e5, tau=1 is 10.7893...",
+      abs(worst - mpf('10.789277')) < mpf('1e-5'), f"value {float(worst):.6f}")
+check("coefficient < 10.80", worst < mpf('10.80'))
+check("coefficient <= 11.4 (printed constant of Theorem 1.1)", worst <= mpf('11.4'))
+check("coefficient decreasing in n",
+      all(coeff(mpf(10) ** a, mpf(1)) > coeff(mpf(10) ** (a + 1), mpf(1))
+          for a in range(5, 40)))
+check("coefficient decreasing in tau",
+      all(coeff(mpf('1e5'), mpf(2) ** r) > coeff(mpf('1e5'), mpf(2) ** (r + 1))
+          for r in range(0, 12)))
 check("modulus admissibility needs only log^2 n > 9 c_0 = 26.59...",
       mlog(mpf('1e5')) ** 2 > 9 * c0)
 

@@ -134,6 +134,14 @@ check("equality fails at y = 4 (so equality holds only at y = 3)",
 print("\nTheorem 1.1  (rebalanced constants)")
 A = (9 * c0) ** mpf('0.5')
 check("sqrt(9 c_0) = 5.15608...", abs(A - mpf('5.156085')) < mpf('1e-6'))
+# Remark 7.1: the two balanced terms each contribute sqrt(9 c_0) n^(3/4) tau^(1/2) log n
+# (NOT 6, which was the value under the superseded c_0 = 4), and sharpening Lemma 2.2's
+# constant 1 to its limit 5/(8pi) gains the factor sqrt(8pi/5), not sqrt(8pi).
+check("Remark 7.1: balanced term constant is sqrt(9 c_0) = 5.15608..., not 6",
+      abs(A - mpf('5.1560848861')) < mpf('1e-9'), f"value {float(A):.7f}")
+check("Remark 7.1: sharpening gain is sqrt(8 pi/5) = 2.24199..., not sqrt(8 pi) = 5.01...",
+      abs((8 * mpi / 5) ** mpf('0.5') - mpf('2.2419964')) < mpf('1e-6')
+      and abs((8 * mpi) ** mpf('0.5') - mpf('5.0132565')) < mpf('1e-6'))
 
 # endpoint-corrected coefficient of Theorem 1.1 (see eq. for |R_k - S_k n| in the proof):
 #   2 sqrt(9c0) + 2/(n^{1/8} tau^{1/2}) + 2 sqrt(9c0)/(sqrt(n) log n)

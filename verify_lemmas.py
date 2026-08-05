@@ -141,6 +141,20 @@ check("F NOT monotone: F(11) > F(13)", F[11] > F[13],
 check("equality fails at y = 4 (so equality holds only at y = 3)",
       mpf('0.5') > mlog(3) / (2 * mlog(4)))
 
+# ------------------------------------------------------------- Thm 1.5 -------
+print("\nTheorem 1.5  (sharpness step)")
+# The sharpness half needs prod_{p|n, p>=3} A_p^{-1} = 1+o(1) when every odd prime
+# factor of n exceeds (1/2)log n.  With A_p = 1 - 1/(p(p-1)) = 1 + O(p^-2) and at most
+# log n/log((1/2)log n) such primes, the correction is exp(O(1/(log n loglog n))).
+def _corr(n):
+    half = mlog(n) / 2
+    cnt = mlog(n) / mlog(half)          # bound on the number of such prime factors
+    return mexp(cnt / half ** 2)        # over-estimate of prod (1 + O(p^-2))
+check("Thm 1.5 sharpness: the omitted-factor correction tends to 1",
+      all(_corr(mpf(10) ** e) > _corr(mpf(10) ** (e + 10)) for e in [5, 20, 50, 100])
+      and _corr(mpf(10) ** 1000) < mpf('1.001'),
+      f"bound at n=1e50 is {float(_corr(mpf(10) ** 50)):.6f}, at n=1e1000 {float(_corr(mpf(10) ** 1000)):.6f}")
+
 # ---------------------------------------------------------------- Thm 1.1 ----
 print("\nTheorem 1.1  (rebalanced constants)")
 A = (9 * c0) ** mpf('0.5')

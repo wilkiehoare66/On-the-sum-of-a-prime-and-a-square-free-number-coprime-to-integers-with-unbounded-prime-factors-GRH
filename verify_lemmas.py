@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-verify_lemmas.py -- checks every finite numerical claim made in Sections 2-3.
+verify_lemmas.py -- checks every finite numerical claim made in Sections 2-3,
+plus the divisor bound used in Proposition 7.4.
 
 Companion to thresholds.py, which certifies Table 1.  This file certifies the
 constants and finite verifications that Table 1 rests on, so that the two
@@ -20,6 +21,10 @@ together cover all the arithmetic in the paper:
                  2 sqrt(9 c_0) + 2/(n^(1/8) tau^(1/2)) + 2 sqrt(9 c_0)/(sqrt(n) log n)
              which is decreasing in n and in tau, hence at most its value at
              n = 1e5, tau = 1, namely 10.7893... < 10.80 <= 11.4.
+  Prop 7.4   the effective divisor bound tau(m) <= 8.5 m^(1/4), certified as an
+             exact supremum over ALL m via the local maxima of the multiplicative
+             function tau(m)/m^(1/4): the supremum is 8.44696..., attained at
+             m = 2^5 3^3 5^2 . 7 . 11 . 13 = 21621600.
 
 Every check is an assertion; the script exits nonzero on any failure.
 
@@ -153,24 +158,46 @@ check("C_Artin*Pi_12 < 0.072 (so no fixed positive constant can serve all r)",
       _A12 < mpf('0.072'), f"value {float(_A12):.7f}")
 
 # Proposition 7.4(ii) uses the effective divisor bound tau(m) <= C_4 m^(1/4) with
-# C_4 = 8.5.  The extremal ratio is attained at 2^5 3^3 5^2 7 . 11 . 13 = 21621600.
+# C_4 = 8.5.  This is certified as an exact supremum, not spot-checked: the function
+# tau(m)/m^(1/4) is multiplicative with value (a+1) p^(-a/4) at p^a, so its supremum
+# is the product of the local maxima, and primes p >= 17 contribute nothing because
+# a+1 <= 2^a <= p^(a/4) there.
+check("17^(1/4) > 2 and a+1 <= 2^a (a>=1), so primes p >= 17 contribute a factor <= 1",
+      mpf(17) ** mpf('0.25') > 2 and all(_a + 1 <= 2 ** _a for _a in range(1, 400)),
+      f"17^(1/4) = {float(mpf(17) ** mpf('0.25')):.9f}")
+
+_sup, _args = mpf(1), []
+for _p in (2, 3, 5, 7, 11, 13):
+    _best, _besta = mpf(0), None
+    for _a in range(0, 400):
+        _v = (_a + 1) / mpf(_p) ** (mpf(_a) / 4)
+        if _v > _best:
+            _best, _besta = _v, _a
+    _sup *= _best
+    _args.append(_besta)
+check("local maxima for p <= 13 occur at exponents (5,3,2,1,1,1)",
+      _args == [5, 3, 2, 1, 1, 1], f"exponents {tuple(_args)}")
+
 _ext = 2 ** 5 * 3 ** 3 * 5 ** 2 * 7 * 11 * 13
 _tau_ext = 6 * 4 * 3 * 2 * 2 * 2          # tau(2^5 3^3 5^2 7 11 13)
 _ratio = mpf(_tau_ext) / mpf(_ext) ** mpf('0.25')
-check("tau(m)/m^(1/4) at the extremal m = 21621600 is 8.4470...",
-      abs(_ratio - mpf('8.44700')) < mpf('1e-3'), f"value {float(_ratio):.5f}")
-check("so tau(m) <= 8.5 m^(1/4) holds there", _ratio < mpf('8.5'))
-# spot-check the bound over a range of m
+check("the extremal m is 2^5 3^3 5^2 . 7 . 11 . 13 = 21621600", _ext == 21621600)
+check("sup_m tau(m)/m^(1/4) = product of local maxima = 8.44696...",
+      abs(_sup - mpf('8.446961724')) < mpf('1e-9'), f"value {float(_sup):.9f}")
+check("the supremum is attained, at m = 21621600", abs(_ratio - _sup) < mpf('1e-25'))
+check("hence tau(m) <= 8.5 m^(1/4) for EVERY m >= 1, not merely a checked range",
+      _sup <= mpf('8.5'), f"headroom {float(mpf('8.5') - _sup):.6f}")
+# independent brute-force cross-check against the certified supremum
 _d = [0] * 200001
 for _i in range(1, 200001):
     for _j in range(_i, 200001, _i):
         _d[_j] += 1
-check("tau(m) <= 8.5 m^(1/4) for all m <= 200000",
-      all(_d[m] <= 8.5 * m ** 0.25 for m in range(1, 200001)))
+check("brute force to 2e5 never exceeds the certified supremum",
+      all(_d[m] <= float(_sup) * m ** 0.25 for m in range(1, 200001)))
 
 print()
 if FAILS:
     print(f"VERIFICATION FAILED on {len(FAILS)} check(s): {', '.join(FAILS)}")
     raise SystemExit(1)
-print("All finite numerical claims in Sections 2-3 verified.")
+print("All finite numerical claims in Sections 2-3 and Proposition 7.4 verified.")
 raise SystemExit(0)

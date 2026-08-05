@@ -176,6 +176,13 @@ worst = coeff(mpf('1e5'), mpf(1))
 check("endpoint-corrected coefficient at n=1e5, tau=1 is 10.7892...",
       abs(worst - mpf('10.789277')) < mpf('1e-5'), f"value {float(worst):.6f}")
 check("coefficient < 10.80", worst < mpf('10.80'))
+# The paper prints 11.4, not 10.8: the margin at 10.8 is only ~0.1%, at 11.4 ~5.7%.
+check("margin at 10.8 is under 0.15% (why 10.8 is not printed)",
+      (mpf('10.8') - worst) / worst < mpf('0.0015'),
+      f"{float((mpf('10.8') - worst) / worst * 100):.3f}%")
+check("margin at 11.4 is over 5% (why 11.4 is printed)",
+      (mpf('11.4') - worst) / worst > mpf('0.05'),
+      f"{float((mpf('11.4') - worst) / worst * 100):.3f}%")
 check("coefficient <= 11.4 (printed constant of Theorem 1.1)", worst <= mpf('11.4'))
 check("coefficient decreasing in n",
       all(coeff(mpf(10) ** a, mpf(1)) > coeff(mpf(10) ** (a + 1), mpf(1))

@@ -52,6 +52,17 @@ print("Lemma 2.2  (explicit GRH bound, closing numeric step)")
 bracket = lambda L: 5 / (8 * mpi) + 2 / L + mpf('3.42620') / L ** 2
 L100 = mlog(100)
 check("bracket < 1 at x = 100", bracket(L100) < 1, f"value {float(bracket(L100)):.6f}")
+
+# The q in {1,2} carve-out of Lemma 2.2 goes through psi, not theta: Schoenfeld's
+# 73.2 threshold is the one for psi, his theta bound needing x >= 599.  The
+# resulting bracket is 1/(8pi) + 1.42620/L^2 + log2/(sqrt(x) L^2).
+q12 = lambda x: 1 / (8 * mpi) + mpf('1.42620') / mlog(x) ** 2 \
+                + mlog(2) / (mp.sqrt(x) * mlog(x) ** 2)
+check("q in {1,2}: bracket < 1 at x = 100", q12(100) < 1,
+      f"value {float(q12(100)):.6f}")
+check("q in {1,2}: bracket decreasing in x",
+      all(q12(mpf(10) ** mpf(t)) > q12(mpf(10) ** mpf(t + mpf('0.5')))
+          for t in [2, 3, 4, 6, 10]))
 check("bracket decreasing in x",
       all(bracket(mlog(mpf(10) ** a)) > bracket(mlog(mpf(10) ** (a + 1)))
           for a in range(2, 30)))

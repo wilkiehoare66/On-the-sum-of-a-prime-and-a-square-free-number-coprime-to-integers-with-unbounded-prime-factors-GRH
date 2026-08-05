@@ -50,7 +50,8 @@ C = Fraction(114, 10)                 # Theorem 1.1 constant, exact
 CARTIN_LO = Fraction(3739558, 10**7)  # strict lower bound for Artin's constant
 RMAX = 12
 
-ODD = list(primerange(3, 200))
+ODD = list(primerange(3, 20000))   # ample: Table 1 needs r <= 12, the
+                                   # Corollary 1.4 cascade checks r <= 60
 
 
 def pi_r(r):
@@ -163,4 +164,65 @@ if __name__ == '__main__':
         raise SystemExit(1)
     print(f"\nAll {RMAX - 2} rows of Table 1 certified, and each also clears the")
     print("strengthened criterion of Corollary 1.3 (even moduli).")
+
+    # ---------------------------------------------------------------------
+    # Corollary 1.4: the uniform threshold N_0 = 6.10e20.
+    #
+    # Two halves.  (a) For r <= 9 the least admissible n is increasing in r,
+    # so it is at most its value at r = 9, which is N_0 itself.  (b) For
+    # r >= 10 the range k <= sqrt(n) forces n >= P_r^2, and the criterion
+    # already holds there, so no constraint on n survives.  Half (b) is the
+    # inequality sqrt(P_r) > 2 K_r log P_r for every r >= 10, proved by
+    # induction with base r = 10 and the growth factor below.
+    # ---------------------------------------------------------------------
+    print("\nCorollary 1.4  (uniform threshold)")
+    cas = []
+
+    def cas_check(name, cond, detail=''):
+        print(f"  {'ok  ' if cond else 'FAIL'}  {name}" + (f"   [{detail}]" if detail else ''))
+        if not cond:
+            cas.append(name)
+
+    N0 = mpf('6.10e20')
+    cas_check("K_r is increasing in r (so the least admissible n is too)",
+              all(K_up(r) < K_up(r + 1) for r in range(0, 60)))
+    worst = max(crossover(r) for r in range(0, 10))
+    cas_check("every crossing for r <= 9 is at most N_0 = 6.10e20",
+              worst <= N0, f"worst is r=9 at {float(worst):.4g}")
+    cas_check("N_0 lies below the r=10 row of Table 1 (1.01e22)", N0 < mpf('1.01e22'))
+
+    # base case and induction for the r >= 10 half
+    C55 = mpf('11.4') / mpf('0.2054')     # >= 11.4/(C_Artin * log3/2), by Lemma 2.5
+
+    def P(r):
+        v = 1
+        for q in ODD[:r]:
+            v *= q
+        return v
+
+    def Psi(r):
+        return (mpf(P(r)) / mpf(2) ** r) ** mpf('0.5') / \
+               (2 * C55 * mlog(ODD[r - 1]) * mlog(mpf(P(r))))
+
+    cas_check("base case Psi(10) > 1", Psi(10) > 1, f"Psi(10) = {float(Psi(10)):.7f}")
+    g = (mpf('18.5') ** mpf('0.5')) * mlog(31) / mlog(62) / 2
+    cas_check("growth factor sqrt(18.5)*(log31/log62)*(1/2) > 1",
+              g > 1, f"value {float(g):.5f}")
+    cas_check("its three ingredients hold: q_{r+1}>=37, Bertrand, q_r <= P_r/3",
+              ODD[10] >= 37
+              and all(ODD[t] < 2 * ODD[t - 1] for t in range(1, 2000))
+              and all(3 * ODD[r - 1] <= P(r) for r in range(2, 60)))
+    cas_check("hence sqrt(P_r) > 2 K_r log P_r directly, r = 10..60",
+              all(mpf(P(r)) ** mpf('0.5') > 2 * K_up(r) * mlog(mpf(P(r)))
+                  for r in range(10, 61)))
+    cas_check("even case: criterion+1 holds at n = 4 P_r^2, r = 10..60",
+              all((4 * mpf(P(r)) ** 2) ** mpf('0.25')
+                  > K_up(r) * mlog(4 * mpf(P(r)) ** 2) + 1 for r in range(10, 61)))
+
+    if cas:
+        print("\nCERTIFICATE FAILED:")
+        for f in cas:
+            print("  ! " + f)
+        raise SystemExit(1)
+    print("\nN_0 = 6.10e20 certified for Corollary 1.4.")
     raise SystemExit(0)

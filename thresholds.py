@@ -51,7 +51,7 @@ CARTIN_LO = Fraction(3739558, 10**7)  # strict lower bound for Artin's constant
 RMAX = 12
 
 ODD = list(primerange(3, 20000))   # ample: Table 1 needs r <= 12, the
-                                   # Corollary 1.4 cascade checks r <= 60
+                                   # Corollary 1.4 cascade checks r <= 60 (k_r there is the primorial)
 
 
 def pi_r(r):

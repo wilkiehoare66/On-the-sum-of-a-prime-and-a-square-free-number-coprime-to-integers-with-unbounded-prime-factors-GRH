@@ -125,6 +125,17 @@ check("min over primes <= 285 is F(3) = log(3)/2",
       min(F.values()) == F[3] and abs(F[3] - target) < mpf('1e-30'))
 check("F(y) > log(3)/2 strictly for every prime 5 <= y <= 285",
       all(F[q] > target for q in F if q >= 5))
+# Corollary 6.1's discussion: the loss factor F(y)/(log3/2) is >= 1 (which is the whole
+# content of Lemma 2.5) and approaches 4 e^-gamma C_2/log 3; it does NOT increase to that
+# value, and the limit is not asserted as an upper bound -- F is not monotone, and the
+# Mertens comparison underlying it is known to oscillate.
+_lim = 2 * mexp(-mpmathify('0.57721566490153286060651209008240243')) * mpf('0.6601618158468696')
+check("loss factor F/(log3/2) >= 1 at every prime y <= 285 (Lemma 2.5)",
+      all(F[l] >= mlog(3) / 2 for l in F))
+check("loss factor limit 4 e^-g C_2/log 3 = 1.3495...",
+      abs(2 * _lim / mlog(3) - mpf('1.3495356')) < mpf('1e-6'))
+check("F stays below its limit at primes up to 285, but only just at the top",
+      all(F[l] < _lim for l in F), f"max {float(max(F.values())):.7f} vs limit {float(_lim):.7f}")
 check("F NOT monotone: F(11) > F(13)", F[11] > F[13],
       f"F(11)={float(F[11]):.6f}, F(13)={float(F[13]):.6f}")
 check("equality fails at y = 4 (so equality holds only at y = 3)",

@@ -1,10 +1,8 @@
 # On the sum of a prime and a square-free number coprime to integers with arbitrarily many prime factors, under GRH
 
-Certificate scripts for the numerical claims in the paper
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21828256.svg)](https://doi.org/10.5281/zenodo.21828255)
 
-> **On the sum of a prime and a square-free number coprime to integers with
-> arbitrarily many prime factors, under GRH**
-> W. Hoare, E. S. Lee, and A. Pearce-Crump.
+Certificate scripts for the numerical claims in the paper *"On the sum of a prime and a square-free number coprime to integers with arbitrarily many prime factors, under GRH*" by W. Hoare, E. S. Lee, and A. Pearce-Crump.
 
 **What this repository is, and is not.** Every theorem in the paper is proved
 analytically; unlike the companion work on `omega(k) <= 3`, there is **no

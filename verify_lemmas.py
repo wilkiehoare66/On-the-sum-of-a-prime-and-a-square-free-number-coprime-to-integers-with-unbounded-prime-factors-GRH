@@ -246,9 +246,40 @@ for _i in range(1, 200001):
 check("brute force to 2e5 never exceeds the certified supremum",
       all(_d[m] <= float(_sup) * m ** 0.25 for m in range(1, 200001)))
 
+# ------------------------------------------------------- Remark 3.5 (notmin) --
+# Along the odd primorials n_Y = prod_{3<=p<=Y} p the singular series does not
+# decay: since n_Y is odd, an odd p fails to divide it exactly when p > Y, so
+# both products of (3.2) run over p > Y, and
+#
+#   Sing_k(n_Y) > (1/2) (1 - 1/Y) (1 - 1.02/log Y)   uniformly in k <= sqrt(n_Y),
+#
+# which exceeds 2/5 from Y = 191 on.  The two ingredients are checked first.
+_P = [p for p in primerange(3, 20000)]
+
+check("1 - rho(p) = (p-1)/(p^2-p-1) < 2/p for every odd p  [(p-2)(p+1) > 0]",
+      all(mpf(p - 1) / (p * p - p - 1) < mpf(2) / p for p in _P))
+check("sum_{m>Y} 1/(m(m-1)) = 1/Y, so prod_{p>Y} A_p > 1 - 1/Y",
+      all(abs(sum(mpf(1) / (m * (m - 1)) for m in range(Y + 1, Y + 40000)) - mpf(1) / Y)
+          < mpf('1e-4') for Y in (101, 199, 1009)))
+check("theta(Y) < 1.01624 Y, so log k <= theta(Y)/2 < 0.51 Y  [RS62 (3.16)]",
+      all(sum(mlog(p) for p in _P if p <= Y) + mlog(2) < mpf('1.01624') * Y
+          for Y in range(3, 20000, 7)))
+
+def _sing_lo(Y):
+    return (1 - mpf(1) / Y) * (1 - mpf('1.02') / mlog(Y)) / 2
+
+check("Sing_k(n_Y) > 2/5 for every prime Y >= 191, uniformly in k",
+      all(_sing_lo(Y) > mpf(2) / 5 for Y in _P if Y >= 191),
+      f"least value {float(_sing_lo(191)):.6f}, at Y = 191")
+check("191 is least: the preceding prime Y = 181 does not clear 2/5",
+      _sing_lo(181) <= mpf(2) / 5, f"value at 181 is {float(_sing_lo(181)):.6f}")
+check("the bound increases to 1/2: it exceeds 0.49 by Y = 1e44",
+      _sing_lo(mpf('1e44')) > mpf('0.49'),
+      f"value {float(_sing_lo(mpf('1e44'))):.6f}")
+
 print()
 if FAILS:
     print(f"VERIFICATION FAILED on {len(FAILS)} check(s): {', '.join(FAILS)}")
     raise SystemExit(1)
-print("All finite numerical claims in Sections 2-3 and Proposition 7.4 verified.")
+print("All finite numerical claims in Sections 2-3, Remark 3.5 and Proposition 7.4 verified.")
 raise SystemExit(0)

@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
 verify_lemmas.py -- checks every finite numerical claim made in Sections 2-3,
-plus the divisor bound used in Proposition 7.4.
+plus the divisor bound used in prop:largek.
 
 Companion to thresholds.py, which certifies Table 1.  This file certifies the
 constants and finite verifications that Table 1 rests on, so that the two
 together cover all the arithmetic in the paper:
 
-  Lemma 2.2  the closing numeric step E(x;q) <= sqrt(x)(log x)^2, i.e. that
+  lem:grh    the closing numeric step: the bracket is at most beta log^2 x, i.e. that
              5/(8 pi) + 2/L + 3.42620/L^2 < 1 for L = log x >= log 100, and
              that this expression is decreasing in x.
-  Lemma 2.3  c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6)) = 2.953912...,
+  lem:ramare c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6)) = 2.953912...,
              the intermediate bound B(M) <= zeta(2)/(zeta(4) M) on the three
              initial intervals and beyond, and the tail bound itself.
-  Lemma 2.5  the finite check over the primes below 285: min F = F(3) = log(3)/2,
+  lem:mertens the finite check over the primes below 285: min F = F(3) = log(3)/2,
              equality only at y = 3, and the NON-monotonicity witness
              F(11) > F(13).
   Thm 1.1    the rebalanced constants sqrt(9 c_0) = 5.15608..., and the
@@ -47,13 +47,13 @@ def check(name, cond, detail=''):
         FAILS.append(name)
 
 
-# ---------------------------------------------------------------- Lemma 2.2 --
-print("Lemma 2.2  (explicit GRH bound, closing numeric step)")
+# ---------------------------------------------------------------- lem:grh --
+print("lem:grh  (explicit GRH bound, closing numeric step)")
 bracket = lambda L: 5 / (8 * mpi) + 2 / L + mpf('3.42620') / L ** 2
 L100 = mlog(100)
 check("bracket < 1 at x = 100", bracket(L100) < 1, f"value {float(bracket(L100)):.6f}")
 
-# The q in {1,2} carve-out of Lemma 2.2 goes through psi, not theta: Schoenfeld's
+# The q in {1,2} carve-out of lem:grh goes through psi, not theta: Schoenfeld's
 # 73.2 threshold is the one for psi, his theta bound needing x >= 599.  The
 # resulting bracket is 1/(8pi) + 1.42620/L^2 + log2/(sqrt(x) L^2).
 q12 = lambda x: 1 / (8 * mpi) + mpf('1.42620') / mlog(x) ** 2 \
@@ -69,8 +69,8 @@ check("bracket decreasing in x",
 check("bracket -> 5/(8 pi) = 0.19894... (so ~5x is discarded, deliberately)",
       abs(bracket(mlog(mpf(10) ** 4000)) - 5 / (8 * mpi)) < mpf('1e-3'))
 
-# ---------------------------------------------------------------- Lemma 2.3 --
-print("\nLemma 2.3  (square-free sieve tail)")
+# ---------------------------------------------------------------- lem:ramare --
+print("\nlem:ramare  (square-free sieve tail)")
 z2, z3, z4, z6 = (zeta(k) for k in (2, 3, 4, 6))
 c0 = z2 ** 2 * z3 / (z4 * z6)
 check("c_0 = 2.953912...", abs(c0 - mpf('2.953912373')) < mpf('1e-9'),
@@ -114,8 +114,8 @@ for a in range(NB, 0, -1):
 check("sum_{a>z} mu^2(a)/phi(a^2) <= c_0/z for z = 1..1e5",
       all(tail[z + 1] <= c0 / z for z in (1, 2, 3, 5, 10, 100, 1000, 10000, 100000)))
 
-# ---------------------------------------------------------------- Lemma 2.5 --
-print("\nLemma 2.5  (uniform Mertens-type bound)")
+# ---------------------------------------------------------------- lem:mertens --
+print("\nlem:mertens  (uniform Mertens-type bound)")
 F, prod = {}, Fraction(1)
 for q in primerange(3, 286):
     prod *= 1 - Fraction(1, q - 1)
@@ -125,12 +125,12 @@ check("min over primes <= 285 is F(3) = log(3)/2",
       min(F.values()) == F[3] and abs(F[3] - target) < mpf('1e-30'))
 check("F(y) > log(3)/2 strictly for every prime 5 <= y <= 285",
       all(F[q] > target for q in F if q >= 5))
-# Corollary 6.1's discussion: the loss factor F(y)/(log3/2) is >= 1 (which is the whole
-# content of Lemma 2.5) and approaches 4 e^-gamma C_2/log 3; it does NOT increase to that
+# cor:sizeform's discussion: the loss factor F(y)/(log3/2) is >= 1 (which is the whole
+# content of lem:mertens) and approaches 4 e^-gamma C_2/log 3; it does NOT increase to that
 # value, and the limit is not asserted as an upper bound -- F is not monotone, and the
 # Mertens comparison underlying it is known to oscillate.
 _lim = 2 * mexp(-mpmathify('0.57721566490153286060651209008240243')) * mpf('0.6601618158468696')
-check("loss factor F/(log3/2) >= 1 at every prime y <= 285 (Lemma 2.5)",
+check("loss factor F/(log3/2) >= 1 at every prime y <= 285 (lem:mertens)",
       all(F[l] >= mlog(3) / 2 for l in F))
 check("loss factor limit 4 e^-g C_2/log 3 = 1.3495...",
       abs(2 * _lim / mlog(3) - mpf('1.3495356')) < mpf('1e-6'))
@@ -142,7 +142,7 @@ check("equality fails at y = 4 (so equality holds only at y = 3)",
       mpf('0.5') > mlog(3) / (2 * mlog(4)))
 
 # ------------------------------------------------------------- Thm 1.5 -------
-print("\nTheorem 1.5  (sharpness step)")
+print("\nthm:extremal  (sharpness step)")
 # The sharpness half needs prod_{p|n, p>=3} A_p^{-1} = 1+o(1) when every odd prime
 # factor of n exceeds (1/2)log n.  With A_p = 1 - 1/(p(p-1)) = 1 + O(p^-2) and at most
 # log n/log((1/2)log n) such primes, the correction is exp(O(1/(log n loglog n))).
@@ -155,49 +155,50 @@ check("Thm 1.5 sharpness: the omitted-factor correction tends to 1",
       and _corr(mpf(10) ** 1000) < mpf('1.001'),
       f"bound at n=1e50 is {float(_corr(mpf(10) ** 50)):.6f}, at n=1e1000 {float(_corr(mpf(10) ** 1000)):.6f}")
 
-# ---------------------------------------------------------------- Thm 1.1 ----
-print("\nTheorem 1.1  (rebalanced constants)")
-A = (9 * c0) ** mpf('0.5')
-check("sqrt(9 c_0) = 5.15608...", abs(A - mpf('5.156085')) < mpf('1e-6'))
-# Remark 7.1: the two balanced terms each contribute sqrt(9 c_0) n^(3/4) tau^(1/2) log n
-# (NOT 6, which was the value under the superseded c_0 = 4), and sharpening Lemma 2.2's
-# constant 1 to its limit 5/(8pi) gains the factor sqrt(8pi/5), not sqrt(8pi).
-check("Remark 7.1: balanced term constant is sqrt(9 c_0) = 5.15608..., not 6",
-      abs(A - mpf('5.1560848861')) < mpf('1e-9'), f"value {float(A):.7f}")
-check("Remark 7.1: sharpening gain is sqrt(8 pi/5) = 2.24199..., not sqrt(8 pi) = 5.01...",
-      abs((8 * mpi / 5) ** mpf('0.5') - mpf('2.2419964')) < mpf('1e-6')
-      and abs((8 * mpi) ** mpf('0.5') - mpf('5.0132565')) < mpf('1e-6'))
+# ------------------------------------------------------------------ thm:main --
+print("\nthm:main  (rebalanced constants)")
+BETA = mpf('0.39852')                      # constant of lem:grh, i.e. the bracket at x = 1e5
+A = (9 * c0 * BETA) ** mpf('0.5')
+check("beta = 0.39852 is an upper bound for the bracket of lem:grh at x = 1e5",
+      5 / (8 * mpi) + 2 / mlog(mpf('1e5')) + mpf('3.42620') / mlog(mpf('1e5')) ** 2 <= BETA,
+      f"bracket at 1e5 is "
+      f"{float(5/(8*mpi) + 2/mlog(mpf('1e5')) + mpf('3.42620')/mlog(mpf('1e5'))**2):.6f}")
+check("the bracket decreases in x, so beta serves every x >= 1e5",
+      all(5/(8*mpi) + 2/mlog(mpf(10)**a) + mpf('3.42620')/mlog(mpf(10)**a)**2
+          > 5/(8*mpi) + 2/mlog(mpf(10)**(a+1)) + mpf('3.42620')/mlog(mpf(10)**(a+1))**2
+          for a in range(5, 60)))
+check("balanced term constant is sqrt(9 c_0 beta) = 3.25490...",
+      abs(A - mpf('3.2549')) < mpf('1e-4'), f"value {float(A):.7f}")
 
-# endpoint-corrected coefficient of Theorem 1.1 (see eq. for |R_k - S_k n| in the proof):
-#   2 sqrt(9c0) + 2/(n^{1/8} tau^{1/2}) + 2 sqrt(9c0)/(sqrt(n) log n)
+# endpoint-corrected coefficient of thm:main (see the display in its proof):
+#   2 sqrt(9 c_0 beta) + 2/(n^{1/8} tau^{1/2}) + 2 sqrt(9 c_0 / beta)/(sqrt(n) log n)
+A2 = (9 * c0 / BETA) ** mpf('0.5')
 coeff = lambda n, tau: 2 * A + 2 / (n ** mpf('0.125') * tau ** mpf('0.5')) \
-                       + 2 * A / (n ** mpf('0.5') * mlog(n))
+                       + 2 * A2 / (n ** mpf('0.5') * mlog(n))
 worst = coeff(mpf('1e5'), mpf(1))
-check("endpoint-corrected coefficient at n=1e5, tau=1 is 10.7892...",
-      abs(worst - mpf('10.789277')) < mpf('1e-5'), f"value {float(worst):.6f}")
-check("coefficient < 10.80", worst < mpf('10.80'))
-# The paper prints 11.4, not 10.8: the margin at 10.8 is only ~0.1%, at 11.4 ~5.7%.
-check("margin at 10.8 is under 0.15% (why 10.8 is not printed)",
-      (mpf('10.8') - worst) / worst < mpf('0.0015'),
-      f"{float((mpf('10.8') - worst) / worst * 100):.3f}%")
-check("margin at 11.4 is over 5% (why 11.4 is printed)",
-      (mpf('11.4') - worst) / worst > mpf('0.05'),
-      f"{float((mpf('11.4') - worst) / worst * 100):.3f}%")
-check("coefficient <= 11.4 (printed constant of Theorem 1.1)", worst <= mpf('11.4'))
+check("endpoint-corrected coefficient at n=1e5, tau=1 is 6.98867...",
+      abs(worst - mpf('6.98867')) < mpf('1e-5'), f"value {float(worst):.6f}")
+check("coefficient <= 7.0 (printed constant of thm:main)", worst <= mpf('7.0'))
 check("coefficient decreasing in n",
       all(coeff(mpf(10) ** a, mpf(1)) > coeff(mpf(10) ** (a + 1), mpf(1))
           for a in range(5, 40)))
 check("coefficient decreasing in tau",
       all(coeff(mpf('1e5'), mpf(2) ** r) > coeff(mpf('1e5'), mpf(2) ** (r + 1))
           for r in range(0, 12)))
-check("modulus admissibility needs only log^2 n > 9 c_0 = 26.58...",
-      mlog(mpf('1e5')) ** 2 > 9 * c0)
+check("modulus admissibility needs only log^2 n > 9 c_0 / beta = 66.71...",
+      mlog(mpf('1e5')) ** 2 > 9 * c0 / BETA,
+      f"9c_0/beta = {float(9*c0/BETA):.2f}, log^2(1e5) = {float(mlog(mpf('1e5'))**2):.2f}")
 
-# Corollary 1.3's chain is uniform in r: the only numeric step is
-#   11.4 * 2^(r/2) * log n > 1  for n >= 1e5, worst case r = 0.
-check("Cor 1.3 key step: 11.4 log(1e5) > 1 (worst case r = 0)",
-      mpf('11.4') * mlog(mpf('1e5')) > 1,
-      f"value {float(mpf('11.4') * mlog(mpf('1e5'))):.2f}")
+# rmk:elementary: what carrying the bracket at x = n rather than at x = 1e5 would gain.
+check("rmk:elementary: further gain in the constant is beta/(5/(8 pi)) = 2.00...",
+      abs(BETA / (5 / (8 * mpi)) - mpf('2.003')) < mpf('1e-2'),
+      f"value {float(BETA/(5/(8*mpi))):.4f}")
+
+# cor:even's chain is uniform in r: the only numeric step is
+#   7.0 * 2^(r/2) * log n > 1  for n >= 1e5, worst case r = 0.
+check("cor:even key step: 7.0 log(1e5) > 1 (worst case r = 0)",
+      mpf('7.0') * mlog(mpf('1e5')) > 1,
+      f"value {float(mpf('7.0') * mlog(mpf('1e5'))):.2f}")
 # and a witness that the SUPERSEDED table-dependent constant 0.072 was untenable:
 # C_Artin * Pi_r decreases to 0, and already dips below 0.072 at r = 12.
 _pi = Fraction(1)
@@ -208,7 +209,7 @@ _A12 = mpf('0.3739558136192023') * mpf(_pi.numerator) / mpf(_pi.denominator)
 check("C_Artin*Pi_12 < 0.072 (so no fixed positive constant can serve all r)",
       _A12 < mpf('0.072'), f"value {float(_A12):.7f}")
 
-# Proposition 7.4(ii) uses the effective divisor bound tau(m) <= C_4 m^(1/4) with
+# prop:largek(ii) uses the explicit divisor bound tau(m) <= C_4 m^(1/4) with
 # C_4 = 8.5.  This is certified as an exact supremum, not spot-checked: the function
 # tau(m)/m^(1/4) is multiplicative with value (a+1) p^(-a/4) at p^a, so its supremum
 # is the product of the local maxima, and primes p >= 17 contribute nothing because
@@ -246,10 +247,10 @@ for _i in range(1, 200001):
 check("brute force to 2e5 never exceeds the certified supremum",
       all(_d[m] <= float(_sup) * m ** 0.25 for m in range(1, 200001)))
 
-# ------------------------------------------------------- Remark 3.5 (notmin) --
+# ----------------------------------------------------------- rmk:notmin --
 # Along the odd primorials n_Y = prod_{3<=p<=Y} p the singular series does not
 # decay: since n_Y is odd, an odd p fails to divide it exactly when p > Y, so
-# both products of (3.2) run over p > Y, and
+# both products of eq:singfactored run over p > Y, and
 #
 #   Sing_k(n_Y) > (1/2) (1 - 1/Y) (1 - 1.02/log Y)   uniformly in k <= sqrt(n_Y),
 #
@@ -281,5 +282,5 @@ print()
 if FAILS:
     print(f"VERIFICATION FAILED on {len(FAILS)} check(s): {', '.join(FAILS)}")
     raise SystemExit(1)
-print("All finite numerical claims in Sections 2-3, Remark 3.5 and Proposition 7.4 verified.")
+print("All finite numerical claims in Sections 2-3, rmk:notmin and prop:largek verified.")
 raise SystemExit(0)

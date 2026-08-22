@@ -130,6 +130,9 @@ def certify_I(r):
         'n_r >= 1e5      (Lemma 4.1)':    n_r >= mpf('1e5'),
         'an admissible k exists':         mpf(k_min(r)) <= kappa_lo(r) * n_r,
         'kappa_r n_r > sqrt(n_r)':        kappa_lo(r) * n_r > n_r ** mpf('0.5'),
+        # surplus above log 2 lets the single term p = 2 be discarded, as in
+        # Corollary 1.3, so an even-k analogue is available at the same row.
+        'surplus exceeds log 2':          slack_I(n_r, r) > mlog(2),
     }
     return m, e, n_r, checks
 
@@ -180,6 +183,7 @@ def certify_II():
             C3 * mlog(mlog(N * mpf(10) ** j)) ** 2 >= z_var_up(N * mpf(10) ** j) ** 2
             for j in range(0, 1000, 5)),
         'range exceeds sqrt(n) at N':  N / (C3 * mlog(mlog(N)) ** 2) > N ** mpf('0.5'),
+        'surplus exceeds log 2':       slack_II(N) > mlog(2),
     }
     return m, e, N, C3, checks
 

@@ -6,7 +6,7 @@ The criterion of Corollary 1.2 is
 
     n^{1/4}  >  K_r * log n,        K_r := C * 2^{r/2} / (C_Artin * Pi_r),
 
-with C = 11.4 the constant of Theorem 1.1, r = omega(k), and
+with C = 10.8 the constant of Theorem 1.1, r = omega(k), and
 
     Pi_r := prod_{t=1}^{r} (1 - 1/(q_t - 1)),   q_1 < q_2 < ... the odd primes.
 
@@ -35,12 +35,10 @@ mp.dps = 60
 # Every input is stated exactly, with its provenance, so that a reader can check
 # the certificate against the paper without re-deriving anything.
 #
-#   C          Theorem 1.1's error constant, 11.4.  This is the PRINTED value,
-#              not the value the proof assembles: the proof of Theorem 1.1
-#              gives 10.7892..., and Section 4 records the decision to print
-#              11.4 rather than its round-up 10.8, so that the constant
-#              absorbs a 5.6% revision of any input instead of 0.1%.  Using
-#              the larger value here makes every threshold larger, i.e. safe.
+#   C          Theorem 1.1's error constant, 10.8.  The proof of Theorem 1.1
+#              assembles 10.7892..., and 10.8 is its round-up; rounding the
+#              constant UP makes K_r larger, the criterion harder, and every
+#              threshold larger, i.e. safe.
 #   CARTIN_LO  strict LOWER bound for Artin's constant 0.3739558136...
 #              (Wrench, Math. Comp. 15 (1961) 396-398).  Using a lower bound
 #              makes K_r larger, i.e. the criterion harder, i.e. safe.
@@ -50,7 +48,7 @@ mp.dps = 60
 # The criterion also involves c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6)) through
 # Theorem 1.1's constant, but c_0 does not appear here directly: it is already
 # folded into C.
-C = Fraction(114, 10)                 # Theorem 1.1 constant, exact
+C = Fraction(108, 10)                 # Theorem 1.1 constant, exact
 CARTIN_LO = Fraction(3739558, 10**7)  # strict lower bound for Artin's constant
 RMAX = 12
 
@@ -115,16 +113,20 @@ def certify(r):
     return m, e, lhs > rhs or n_vac >= n_err, binding
 
 
-# The rows as PRINTED IN TABLE 1 of the paper.  Every one is re-derived and
-# asserted below, so this file fails loudly if the paper and the code drift.
+# The Corollary 1.2 crossings.  Rows 3-9 are what Table 1 of the paper prints;
+# from r = 10 the crossing is superseded there by Proposition 7.4(i), which is
+# smaller and is certified by largek.py -- the rows below are retained because
+# Corollary 1.4's cascade argument, and largek.py's comparison column, both
+# need the Corollary 1.2 value at every r.  Each is re-derived and asserted, so
+# this file fails loudly if the paper and the code drift apart.
 TABLE_1 = {
-    3:  (Fraction(5, 16),           105,                 1.08, 16),
-    4:  (Fraction(9, 32),           1155,                8.13, 16),
-    5:  (Fraction(33, 128),         15015,               5.59, 17),
-    6:  (Fraction(495, 2048),       255255,              3.45, 18),
-    7:  (Fraction(935, 4096),       4849845,             2.04, 19),
-    8:  (Fraction(1785, 8192),      111546435,           1.15, 20),
-    9:  (Fraction(6885, 32768),     3234846615,          6.10, 20),
+    3:  (Fraction(5, 16),           105,                 8.45, 15),
+    4:  (Fraction(9, 32),           1155,                6.39, 16),
+    5:  (Fraction(33, 128),         15015,               4.40, 17),
+    6:  (Fraction(495, 2048),       255255,              2.71, 18),
+    7:  (Fraction(935, 4096),       4849845,             1.61, 19),
+    8:  (Fraction(1785, 8192),      111546435,           9.02, 19),
+    9:  (Fraction(6885, 32768),     3234846615,          4.82, 20),
     10: (Fraction(13311, 65536),    100280245065,        1.01, 22),
     11: (Fraction(51765, 262144),   3710369067405,       1.38, 25),
     12: (Fraction(403767, 2097152), 152125131763605,     2.32, 28),
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     print("strengthened criterion of Corollary 1.3 (even moduli).")
 
     # ---------------------------------------------------------------------
-    # Corollary 1.4: the uniform threshold N_0 = 6.10e20.
+    # Corollary 1.4: the uniform threshold N_0 = 4.82e20.
     #
     # Two halves.  (a) For r <= 9 the least admissible n is increasing in r,
     # so it is at most its value at r = 9, which is N_0 itself.  (b) For
@@ -187,16 +189,16 @@ if __name__ == '__main__':
         if not cond:
             cas.append(name)
 
-    N0 = mpf('6.10e20')
+    N0 = mpf('4.82e20')
     cas_check("K_r is increasing in r (so the least admissible n is too)",
               all(K_up(r) < K_up(r + 1) for r in range(0, 60)))
     worst = max(crossover(r) for r in range(0, 10))
-    cas_check("every crossing for r <= 9 is at most N_0 = 6.10e20",
+    cas_check("every crossing for r <= 9 is at most N_0 = 4.82e20",
               worst <= N0, f"worst is r=9 at {float(worst):.4g}")
     cas_check("N_0 lies below the r=10 row of Table 1 (1.01e22)", N0 < mpf('1.01e22'))
 
     # base case and induction for the r >= 10 half
-    C55 = mpf('11.4') / mpf('0.2054')     # >= 11.4/(C_Artin * log3/2), by Lemma 2.5
+    C55 = mpf('10.8') / mpf('0.2054')     # >= 10.8/(C_Artin * log3/2), by Lemma 2.5
 
     def P(r):
         v = 1
@@ -228,5 +230,5 @@ if __name__ == '__main__':
         for f in cas:
             print("  ! " + f)
         raise SystemExit(1)
-    print("\nN_0 = 6.10e20 certified for Corollary 1.4.")
+    print("\nN_0 = 4.82e20 certified for Corollary 1.4.")
     raise SystemExit(0)

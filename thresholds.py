@@ -35,8 +35,12 @@ mp.dps = 60
 # Every input is stated exactly, with its provenance, so that a reader can check
 # the certificate against the paper without re-deriving anything.
 #
-#   C          Theorem 1.1's error constant, 11.4.  Printed value; the proof
-#              gives 2*sqrt(9*c_0) + 1 = 11.3122..., and 11.4 is its round-up.
+#   C          Theorem 1.1's error constant, 11.4.  This is the PRINTED value,
+#              not the value the proof assembles: the proof of Theorem 1.1
+#              gives 10.7892..., and Section 4 records the decision to print
+#              11.4 rather than its round-up 10.8, so that the constant
+#              absorbs a 5.6% revision of any input instead of 0.1%.  Using
+#              the larger value here makes every threshold larger, i.e. safe.
 #   CARTIN_LO  strict LOWER bound for Artin's constant 0.3739558136...
 #              (Wrench, Math. Comp. 15 (1961) 396-398).  Using a lower bound
 #              makes K_r larger, i.e. the criterion harder, i.e. safe.

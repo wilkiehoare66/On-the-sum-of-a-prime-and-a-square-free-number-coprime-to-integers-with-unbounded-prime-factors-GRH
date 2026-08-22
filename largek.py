@@ -63,13 +63,15 @@ DN = 1 - mpf(10) ** (-40)
 C0_UP = (zeta(2) ** 2 * zeta(3) / (zeta(4) * zeta(6))) * UP
 A = 45 * C0_UP / mpf('0.2054')
 TAU_C = mpf('8.5')
+BETA = mpf('0.39851')          # constant of Lemma 2.2; scales the GRH remainder in (4.6)
 THETA_C = mpf('0.84')
 
 # Constants AS PRINTED IN THE PAPER.  Re-derived and asserted below, so this
 # file fails loudly if the paper and the code drift apart.
-PROP_52_I = {10: (5.46, 21), 11: (2.78, 22), 12: (1.40, 23)}
-PROP_52_II_N = (6.10, 41)
-PROP_52_II_C3 = mpf('4.53e5')
+PROP_52_I = {10: (7.37, 20), 11: (3.77, 21), 12: (1.90, 22)}
+PROP_52_II_N = (1.01, 40)
+PROP_52_II_C3 = mpf('4.54e5')
+PROP_52_II_C2 = mpf('673.2')      # printed C_2', with C_3 = C_2'^2 <= 4.53e5
 
 
 def round_up_3sf(x):
@@ -102,7 +104,7 @@ def slack_I(n, r):
     z, tau = z_const_up(r), mpf(2) ** r
     lhs = mpf('0.8') * delta_lo(r) * n * DN
     rhs = (2 * n ** mpf('0.625') * mlog(n)
-           + z * tau * n ** mpf('0.5') * mlog(n) ** 2
+           + BETA * z * tau * n ** mpf('0.5') * mlog(n) ** 2
            + 2 * z * tau * mlog(n)) * UP
     return lhs - rhs
 
@@ -156,7 +158,7 @@ def slack_II(n):
     z, tau = z_var_up(n), TAU_C * n ** mpf('0.25') * UP
     lhs = delta_k_lo(n) * n / 5 * DN
     rhs = (2 * n ** mpf('0.625') * mlog(n)
-           + z * tau * n ** mpf('0.5') * mlog(n) ** 2
+           + BETA * z * tau * n ** mpf('0.5') * mlog(n) ** 2
            + 2 * z * tau * mlog(n)) * UP
     return lhs - rhs
 
@@ -217,6 +219,10 @@ if __name__ == '__main__':
     if C3 != PROP_52_II_C3:
         failures.append(f"Prop 5.2(ii): certified C_3 is {float(C3):g}, "
                         f"paper prints {float(PROP_52_II_C3):g}")
+    C2 = z_var_up(N) / mlog(mlog(N))
+    if not (PROP_52_II_C2 >= C2 and PROP_52_II_C2 ** 2 <= PROP_52_II_C3):
+        failures.append(f"Prop 5.2(ii): printed C_2' = {float(PROP_52_II_C2):g} must satisfy "
+                        f"{float(C2):.3f} <= C_2' and C_2'^2 <= {float(PROP_52_II_C3):g}")
 
     print(f"\nProposition 5.2(ii)  uniform in r\n")
     print(f"  N      = {float(m):.2f}e{e}")

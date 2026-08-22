@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-thresholds.py -- certified thresholds for Corollary 1.2 (Table 1).
+thresholds.py -- certified thresholds for cor:positivity (Table 1).
 
-The criterion of Corollary 1.2 is
+The criterion of cor:positivity is
 
     n^{1/4}  >  K_r * log n,        K_r := C * 2^{r/2} / (C_Artin * Pi_r),
 
-with C = 7.0 the constant of Theorem 1.1, r = omega(k), and
+with C = 7.0 the constant of thm:main, r = omega(k), and
 
     Pi_r := prod_{t=1}^{r} (1 - 1/(q_t - 1)),   q_1 < q_2 < ... the odd primes.
 
@@ -35,7 +35,7 @@ mp.dps = 60
 # Every input is stated exactly, with its provenance, so that a reader can check
 # the certificate against the paper without re-deriving anything.
 #
-#   C          Theorem 1.1's error constant, 7.0.  The proof of Theorem 1.1
+#   C          thm:main's error constant, 7.0.  The proof of thm:main
 #              assembles 6.98859..., and 7.0 is its round-up; rounding the
 #              constant UP makes K_r larger, the criterion harder, and every
 #              threshold larger, i.e. safe.
@@ -46,14 +46,14 @@ mp.dps = 60
 #   RMAX       largest omega(k) tabulated.
 #
 # The criterion also involves c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6)) through
-# Theorem 1.1's constant, but c_0 does not appear here directly: it is already
+# thm:main's constant, but c_0 does not appear here directly: it is already
 # folded into C.
-C = Fraction(70, 10)                  # Theorem 1.1 constant, exact
+C = Fraction(70, 10)                  # thm:main constant, exact
 CARTIN_LO = Fraction(3739558, 10**7)  # strict lower bound for Artin's constant
 RMAX = 12
 
 ODD = list(primerange(3, 20000))   # ample: Table 1 needs r <= 12, the
-                                   # Corollary 1.4 cascade checks r <= 60 (k_r there is the primorial)
+                                   # cor:uniform cascade checks r <= 60 (k_r there is the primorial)
 
 
 def pi_r(r):
@@ -82,7 +82,7 @@ def K_up(r):
 def crossover(r, plus1=True):
     """Least n clearing the criterion, by bisection on the upper branch.
 
-    With plus1 (the default) this solves Corollary 1.3's strengthened form
+    With plus1 (the default) this solves cor:even's strengthened form
     n^{1/4} > K_r log n + 1, which is what the printed thresholds must satisfy:
     at C = 7.0 the plain crossing rounded up to 3 s.f. no longer leaves room
     for the +1 at r = 4 and r = 5, so solving the weaker form and asserting the
@@ -120,11 +120,11 @@ def certify(r):
     return m, e, lhs > rhs or n_vac >= n_err, binding
 
 
-# The Corollary 1.2 crossings.  Rows 3-9 are what Table 1 of the paper prints;
-# from r = 10 the crossing is superseded there by Proposition 7.4(i), which is
+# The cor:positivity crossings.  Rows 3-9 are what Table 1 of the paper prints;
+# from r = 10 the crossing is superseded there by prop:largek(i), which is
 # smaller and is certified by largek.py -- the rows below are retained because
-# Corollary 1.4's cascade argument, and largek.py's comparison column, both
-# need the Corollary 1.2 value at every r.  Each is re-derived and asserted, so
+# cor:uniform's cascade argument, and largek.py's comparison column, both
+# need the cor:positivity value at every r.  Each is re-derived and asserted, so
 # this file fails loudly if the paper and the code drift apart.
 TABLE_1 = {
     3:  (Fraction(5, 16),           105,                 1.20, 15),
@@ -149,10 +149,10 @@ def check_row(r):
     assert ok, f"r={r}: criterion FAILS at the printed threshold"
     assert (float(m), e) == (m_paper, e_paper), \
         f"r={r}: certified n_0 is {float(m)}e{e}, table prints {m_paper}e{e_paper}"
-    # the printed threshold must also clear Corollary 1.3's strengthened form
+    # the printed threshold must also clear cor:even's strengthened form
     n0 = mpf(m) * mpf(10) ** e
     assert n0 ** mpf('0.25') > K_up(r) * mlog(n0) + 1, \
-        f"r={r}: printed n_0 fails the +1 criterion of Corollary 1.3"
+        f"r={r}: printed n_0 fails the +1 criterion of cor:even"
     return m, e, binding
 
 
@@ -176,10 +176,10 @@ if __name__ == '__main__':
             print("  ! " + f)
         raise SystemExit(1)
     print(f"\nAll {RMAX - 2} rows of Table 1 certified, and each also clears the")
-    print("strengthened criterion of Corollary 1.3 (even moduli).")
+    print("strengthened criterion of cor:even.")
 
     # ---------------------------------------------------------------------
-    # Corollary 1.4: the uniform threshold N_0 = 7.22e19.
+    # cor:uniform: the uniform threshold N_0 = 7.22e19.
     #
     # Two halves.  (a) For r <= 9 the least admissible n is increasing in r,
     # so it is at most its value at r = 9, which is N_0 itself.  (b) For
@@ -188,7 +188,7 @@ if __name__ == '__main__':
     # inequality sqrt(P_r) > 2 K_r log P_r for every r >= 10, proved by
     # induction with base r = 10 and the growth factor below.
     # ---------------------------------------------------------------------
-    print("\nCorollary 1.4  (uniform threshold)")
+    print("\ncor:uniform  (uniform threshold)")
     cas = []
 
     def cas_check(name, cond, detail=''):
@@ -205,7 +205,7 @@ if __name__ == '__main__':
     cas_check("N_0 lies below the r=10 row of Table 1 (1.01e22)", N0 < mpf('1.01e22'))
 
     # base case and induction for the r >= 10 half
-    C55 = mpf('7.0') / mpf('0.2054')     # >= 7.0/(C_Artin * log3/2), by Lemma 2.5
+    C55 = mpf('7.0') / mpf('0.2054')     # >= 7.0/(C_Artin * log3/2), by lem:mertens
 
     def P(r):
         v = 1
@@ -237,5 +237,5 @@ if __name__ == '__main__':
         for f in cas:
             print("  ! " + f)
         raise SystemExit(1)
-    print("\nN_0 = 7.22e19 certified for Corollary 1.4.")
+    print("\nN_0 = 7.22e19 certified for cor:uniform.")
     raise SystemExit(0)

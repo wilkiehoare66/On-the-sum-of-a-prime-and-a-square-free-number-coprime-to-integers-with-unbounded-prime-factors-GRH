@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 """
-largek.py -- certified constants for Proposition 5.2 (large k).
+largek.py -- certified constants for prop:largek (large k).
 
-Theorem 1.1 balances the two error terms of the master bound (4.6) by the
-choice (4.7) of truncation level z, which forces k <= sqrt(n).  Proposition 5.2
+thm:main balances the two error terms of the master bound eq:master by the
+choice eq:zchoice of truncation level z, with k <= sqrt(n).  prop:largek
 gives up the asymptotic and keeps only positivity, and can then take z far
 smaller -- admitting k almost as large as n.  The paper leaves its thresholds
 effective but uncomputed; this script computes them.
 
-PART I  (Proposition 5.2(i), fixed r).  Take the CONSTANT level
-z = 45 c_0 / delta_r, for which the tail term 9 c_0 n / z of (4.6) is exactly
+PART I  (prop:largek(i), fixed r).  Take the CONSTANT level
+z = 45 c_0 / delta_r, for which the tail term 9 c_0 n / z of eq:master is exactly
 delta_r n / 5 and the constraint z^2 k <= n reads k <= kappa_r n with
 kappa_r := (delta_r / (45 c_0))^2.  Writing delta_r = C_Artin * Pi_r and
 tau = 2^r, positivity needs
 
     (4/5) delta_r n  >  2 n^{5/8} log n + z tau sqrt(n) (log n)^2 + 2 z tau log n,
 
-together with the hypotheses of (4.6) -- n >= 1e5 and 1 <= z <= n^{3/8} -- and
+together with the hypotheses of eq:master -- n >= 1e5 and 1 <= z <= n^{3/8} -- and
 k_r <= kappa_r n so that an admissible k exists at all (k_r = odd primorial).
 
-PART II  (Proposition 5.2(ii), uniform in r).  Take z = (45 c_0 / 0.2054)
+PART II  (prop:largek(ii), uniform in r).  Take z = (45 c_0 / 0.2054)
 log y(k), for which the tail term is delta(k) n / 5 with
-delta(k) = 0.2054 / log y(k).  Bounding y(k) by (5.3), tau(k) by the divisor
-bound (5.4), and requiring the three remaining terms of (4.6) to fall below
+delta(k) = 0.2054 / log y(k).  Bounding y(k) by eq:ybound, tau(k) by the divisor
+bound eq:taubound, and requiring the three remaining terms of eq:master to fall below
 delta(k) n / 5 yields the absolute threshold N; C_3 is then the least constant
 for which k <= n / (C_3 (log log n)^2) forces z^2 k <= n throughout n >= N.
 
@@ -51,19 +51,19 @@ from thresholds import ODD, pi_r, k_min, CARTIN_LO, TABLE_1, RMAX
 # ---------------------------------------------------------------- inputs ----
 #   UP / DN    one-ulp nudges at 60 digits, used to direct every rounding.
 #   C0_UP      strict UPPER bound for c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6))
-#              = 2.953912... (Lemma 2.3).  c_0 enters only through z, and a
+#              = 2.953912... (lem:ramare).  c_0 enters only through z, and a
 #              larger z makes both the error side and admissibility harder.
 #   A          the coefficient (45 c_0 / 0.2054) of log y(k) in Part II's z,
-#              where 0.2054 is the lower bound of Proposition 3.1(ii).
-#   TAU_C      the divisor-bound constant of (5.4): tau(m) <= 8.5 m^{1/4}.
-#   THETA_C    Rosser-Schoenfeld: theta(y) > 0.84 y for y >= 101, used in (5.3).
+#              where 0.2054 is the lower bound of prop:singlower(ii).
+#   TAU_C      the divisor-bound constant of eq:taubound: tau(m) <= 8.5 m^{1/4}.
+#   THETA_C    Rosser-Schoenfeld: theta(y) > 0.84 y for y >= 101, used in eq:ybound.
 UP = 1 + mpf(10) ** (-40)
 DN = 1 - mpf(10) ** (-40)
 
 C0_UP = (zeta(2) ** 2 * zeta(3) / (zeta(4) * zeta(6))) * UP
 A = 45 * C0_UP / mpf('0.2054')
 TAU_C = mpf('8.5')
-BETA = mpf('0.39851')          # constant of Lemma 2.2; scales the GRH remainder in (4.6)
+BETA = mpf('0.39852')          # constant of lem:grh; scales the GRH remainder in eq:master
 THETA_C = mpf('0.84')
 
 # Constants AS PRINTED IN THE PAPER.  Re-derived and asserted below, so this
@@ -127,13 +127,13 @@ def certify_I(r):
     n_r = m * mpf(10) ** e
     checks = {
         'positivity holds at n_r':        slack_I(n_r, r) > 0,
-        'z <= n_r^{3/8}  (Lemma 4.1)':    z_const_up(r) <= n_r ** mpf('0.375'),
+        'z <= n_r^{3/8}  (lem:tail)':    z_const_up(r) <= n_r ** mpf('0.375'),
         'z >= 1          (Prop. 4.2)':    z_const_up(r) >= 1,
-        'n_r >= 1e5      (Lemma 4.1)':    n_r >= mpf('1e5'),
+        'n_r >= 1e5      (lem:tail)':    n_r >= mpf('1e5'),
         'an admissible k exists':         mpf(k_min(r)) <= kappa_lo(r) * n_r,
         'kappa_r n_r > sqrt(n_r)':        kappa_lo(r) * n_r > n_r ** mpf('0.5'),
         # surplus above log 2 lets the single term p = 2 be discarded, as in
-        # Corollary 1.3, so an even-k analogue is available at the same row.
+        # cor:even, so an even-k analogue is available at the same row.
         'surplus exceeds log 2':          slack_I(n_r, r) > mlog(2),
     }
     return m, e, n_r, checks
@@ -141,7 +141,7 @@ def certify_I(r):
 
 # ========================================================== Part II =========
 def y_up(n):
-    """Upper bound for y(k) over k <= n, from (5.3)."""
+    """Upper bound for y(k) over k <= n, from eq:ybound."""
     return max(mpf(101), (mlog(n) + mlog(2)) / THETA_C * UP)
 
 
@@ -194,15 +194,15 @@ def certify_II():
 if __name__ == '__main__':
     failures = []
 
-    print("Proposition 5.2(i)   thresholds n_r, and comparison with Table 1\n")
-    print(f"{'r':>3} {'kappa_r':>12} {'z':>9} {'n_r':>12} {'Cor. 1.2':>11} "
+    print("prop:largek(i)   thresholds n_r, and comparison with Table 1\n")
+    print(f"{'r':>3} {'kappa_r':>12} {'z':>9} {'n_r':>12} {'cor:pos':>11} "
           f"{'gain':>11} {'range/sqrt(n)':>14} {'ok':>4}")
     for r in range(3, RMAX + 1):
         m, e, n_r, checks = certify_I(r)
         bad = [k for k, ok in checks.items() if not ok]
-        failures += [f"Prop 5.2(i), r={r}: {k}" for k in bad]
+        failures += [f"prop:largek(i), r={r}: {k}" for k in bad]
         if r in PROP_52_I and (float(m), e) != PROP_52_I[r]:
-            failures.append(f"Prop 5.2(i), r={r}: certified n_r is {float(m)}e{e}, "
+            failures.append(f"prop:largek(i), r={r}: certified n_r is {float(m)}e{e}, "
                             f"paper prints {PROP_52_I[r][0]}e{PROP_52_I[r][1]}")
         t1 = mpf(TABLE_1[r][2]) * mpf(10) ** TABLE_1[r][3]
         print(f"{r:>3} {float(kappa_lo(r)):>12.3e} {float(z_const_up(r)):>9.1f} "
@@ -212,19 +212,19 @@ if __name__ == '__main__':
 
     m, e, N, C3, checks = certify_II()
     bad = [k for k, ok in checks.items() if not ok]
-    failures += [f"Prop 5.2(ii): {k}" for k in bad]
+    failures += [f"prop:largek(ii): {k}" for k in bad]
     if (float(m), e) != PROP_52_II_N:
-        failures.append(f"Prop 5.2(ii): certified N is {float(m)}e{e}, "
+        failures.append(f"prop:largek(ii): certified N is {float(m)}e{e}, "
                         f"paper prints {PROP_52_II_N[0]}e{PROP_52_II_N[1]}")
     if C3 != PROP_52_II_C3:
-        failures.append(f"Prop 5.2(ii): certified C_3 is {float(C3):g}, "
+        failures.append(f"prop:largek(ii): certified C_3 is {float(C3):g}, "
                         f"paper prints {float(PROP_52_II_C3):g}")
     C2 = z_var_up(N) / mlog(mlog(N))
     if not (PROP_52_II_C2 >= C2 and PROP_52_II_C2 ** 2 <= PROP_52_II_C3):
-        failures.append(f"Prop 5.2(ii): printed C_2' = {float(PROP_52_II_C2):g} must satisfy "
+        failures.append(f"prop:largek(ii): printed C_2' = {float(PROP_52_II_C2):g} must satisfy "
                         f"{float(C2):.3f} <= C_2' and C_2'^2 <= {float(PROP_52_II_C3):g}")
 
-    print(f"\nProposition 5.2(ii)  uniform in r\n")
+    print(f"\nprop:largek(ii)  uniform in r\n")
     print(f"  N      = {float(m):.2f}e{e}")
     print(f"  C_3    = {float(C3):.3g}")
     print(f"  z(N)   = {float(z_var_up(N)):.2f}   (y(k) <= {float(y_up(N)):.1f})")
@@ -238,5 +238,5 @@ if __name__ == '__main__':
         for f in failures:
             print("  ! " + f)
         raise SystemExit(1)
-    print("\nAll constants of Proposition 5.2 certified.")
+    print("\nAll constants of prop:largek certified.")
     raise SystemExit(0)

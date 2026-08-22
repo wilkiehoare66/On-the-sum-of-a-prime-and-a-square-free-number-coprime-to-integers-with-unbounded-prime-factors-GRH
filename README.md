@@ -6,14 +6,13 @@ Certificate scripts for the numerical claims in the paper *"On the sum of a
 prime and a square-free number coprime to integers with arbitrarily many prime
 factors, under GRH"* by W. Hoare, E. S. Lee, and A. Pearce-Crump.
 
-**What this repository is, and is not.** Every theorem in the paper is proved
-analytically; unlike the companion work on `omega(k) <= 5`, there is **no
-exhaustive computational range** on which any result depends, and so no C++
-here. What the paper does contain is a set of finite numerical claims — the
-finite checks inside the lemmas, the ten rows of Table 1, and the constants of
-`prop:largek` — and these three scripts certify all of them. All are
-assertion-driven and exit nonzero if any claim fails, so a reader can check
-every number in the paper with three commands.
+**What this repository is.** Every theorem in the paper is proved analytically;
+no result depends on an exhaustive search over a range of `n`. What the paper
+does contain is a set of finite numerical claims — the checks that close several
+of the lemmas, the ten rows of Table 1, and the constants of `prop:largek` — and
+these three scripts certify all of them. Each is assertion-driven and exits
+nonzero if any claim fails, so a reader can check every number in the paper with
+three commands, in under a minute.
 
 The paper is hosted separately; this repository holds only the certificates.
 
@@ -168,7 +167,3 @@ each prime gap* rather than by any global monotonicity.
   would lower every row of Table 1 by a further factor of about `3.7`. The paper
   declines this, for the reason given in `rmk:elementary`: the sharp bracket
   depends on `x`, so `thm:main` would carry no numerical constant at all.
-- Table 1's rows for `r >= 10` are fixed by the range `k <= sqrt(n)` rather than
-  by the error term. Proposition 7.4 of the paper shows that positivity in fact
-  persists for `k` almost as large as `n` itself, but its constants, though
-  effective, have not been computed; no entry of Table 1 relies on it.

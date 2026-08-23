@@ -8,19 +8,25 @@ constants and finite verifications that Table 1 rests on, so that the two
 together cover all the arithmetic in the paper:
 
   lem:grh    the closing numeric step: the bracket is at most beta log^2 x, i.e. that
-             5/(8 pi) + 2/L + 3.42620/L^2 < 1 for L = log x >= log 100, and
-             that this expression is decreasing in x.
+             5/(8 pi) + 2/L + 3.43/L^2 < 1 for L = log x >= log 100, and
+             that this expression is decreasing in x.  The constant 3.43 is
+             that of Lee, Q. J. Math. 74 (2023), App. A, (A7), which lem:grh
+             now quotes in place of specialising Grenie-Molteni by hand.
   lem:ramare c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6)) = 2.953912...,
              the intermediate bound B(M) <= zeta(2)/(zeta(4) M) on the three
              initial intervals and beyond, and the tail bound itself.
   lem:mertens the finite check over the primes below 285: min F = F(3) = log(3)/2,
              equality only at y = 3, and the NON-monotonicity witness
              F(11) > F(13).
-  Thm 1.1    the rebalanced constants sqrt(9 c_0) = 5.15608..., and the
-             endpoint-corrected coefficient
-                 2 sqrt(9 c_0) + 2/(n^(1/8) tau^(1/2)) + 2 sqrt(9 c_0)/(sqrt(n) log n)
+  thm:main   the split point lambda = 3/10 of lem:tail, at which
+             A(lambda) = 1 + 2/(1-2 lambda) = 6 exactly; the balanced constant
+             sqrt(6 c_0 beta) = 2.65772...; and the assembled coefficient
+                 2 sqrt(6 c_0 beta) + 2/(n^(1/20) tau^(1/2))
+                                    + 2 sqrt(6 c_0/beta)/(sqrt(n) log n)
              which is decreasing in n and in tau, hence at most its value at
-             n = 1e5, tau = 1, namely 10.7892... < 10.80 <= 11.4.
+             n = 1e5, tau = 1, namely 6.44380... <= 6.5.  Also the closing
+             inequality eq:lamcheck of lem:tail, and the optimality of the cut
+             claimed in rmk:splitpoint.
   Prop 7.4   the effective divisor bound tau(m) <= 8.5 m^(1/4), certified as an
              exact supremum over ALL m via the local maxima of the multiplicative
              function tau(m)/m^(1/4): the supremum is 8.44696..., attained at
@@ -49,7 +55,7 @@ def check(name, cond, detail=''):
 
 # ---------------------------------------------------------------- lem:grh --
 print("lem:grh  (explicit GRH bound, closing numeric step)")
-bracket = lambda L: 5 / (8 * mpi) + 2 / L + mpf('3.42620') / L ** 2
+bracket = lambda L: 5 / (8 * mpi) + 2 / L + mpf('3.43') / L ** 2
 L100 = mlog(100)
 check("bracket < 1 at x = 100", bracket(L100) < 1, f"value {float(bracket(L100)):.6f}")
 
@@ -157,37 +163,38 @@ check("Thm 1.5 sharpness: the omitted-factor correction tends to 1",
 
 # ------------------------------------------------------------------ thm:main --
 print("\nthm:main  (rebalanced constants)")
-BETA = mpf('0.39852')                      # constant of lem:grh, i.e. the bracket at x = 1e5
-A = (9 * c0 * BETA) ** mpf('0.5')
-check("beta = 0.39852 is an upper bound for the bracket of lem:grh at x = 1e5",
-      5 / (8 * mpi) + 2 / mlog(mpf('1e5')) + mpf('3.42620') / mlog(mpf('1e5')) ** 2 <= BETA,
+BETA = mpf('0.39854')                      # constant of lem:grh, i.e. the bracket at x = 1e5
+A = (6 * c0 * BETA) ** mpf('0.5')
+check("beta = 0.39854 is an upper bound for the bracket of lem:grh at x = 1e5",
+      5 / (8 * mpi) + 2 / mlog(mpf('1e5')) + mpf('3.43') / mlog(mpf('1e5')) ** 2 <= BETA,
       f"bracket at 1e5 is "
-      f"{float(5/(8*mpi) + 2/mlog(mpf('1e5')) + mpf('3.42620')/mlog(mpf('1e5'))**2):.6f}")
+      f"{float(5/(8*mpi) + 2/mlog(mpf('1e5')) + mpf('3.43')/mlog(mpf('1e5'))**2):.7f}")
 check("the bracket decreases in x, so beta serves every x >= 1e5",
-      all(5/(8*mpi) + 2/mlog(mpf(10)**a) + mpf('3.42620')/mlog(mpf(10)**a)**2
-          > 5/(8*mpi) + 2/mlog(mpf(10)**(a+1)) + mpf('3.42620')/mlog(mpf(10)**(a+1))**2
+      all(5/(8*mpi) + 2/mlog(mpf(10)**a) + mpf('3.43')/mlog(mpf(10)**a)**2
+          > 5/(8*mpi) + 2/mlog(mpf(10)**(a+1)) + mpf('3.43')/mlog(mpf(10)**(a+1))**2
           for a in range(5, 60)))
-check("balanced term constant is sqrt(9 c_0 beta) = 3.25490...",
-      abs(A - mpf('3.2549')) < mpf('1e-4'), f"value {float(A):.7f}")
+check("balanced term constant is sqrt(6 c_0 beta) = 2.65772...",
+      abs(A - mpf('2.657727')) < mpf('1e-5'), f"value {float(A):.7f}")
 
-# endpoint-corrected coefficient of thm:main (see the display in its proof):
-#   2 sqrt(9 c_0 beta) + 2/(n^{1/8} tau^{1/2}) + 2 sqrt(9 c_0 / beta)/(sqrt(n) log n)
-A2 = (9 * c0 / BETA) ** mpf('0.5')
-coeff = lambda n, tau: 2 * A + 2 / (n ** mpf('0.125') * tau ** mpf('0.5')) \
+# endpoint-corrected coefficient of thm:main (see the display in its proof), at the
+# split point lambda = 3/10 of lem:tail, where A(lambda) = 1 + 2/(1-2 lambda) = 6:
+#   2 sqrt(6 c_0 beta) + 2/(n^{1/20} tau^{1/2}) + 2 sqrt(6 c_0 / beta)/(sqrt(n) log n)
+A2 = (6 * c0 / BETA) ** mpf('0.5')
+coeff = lambda n, tau: 2 * A + 2 / (n ** mpf('0.05') * tau ** mpf('0.5')) \
                        + 2 * A2 / (n ** mpf('0.5') * mlog(n))
 worst = coeff(mpf('1e5'), mpf(1))
-check("endpoint-corrected coefficient at n=1e5, tau=1 is 6.98867...",
-      abs(worst - mpf('6.98867')) < mpf('1e-5'), f"value {float(worst):.6f}")
-check("coefficient <= 7.0 (printed constant of thm:main)", worst <= mpf('7.0'))
+check("endpoint-corrected coefficient at n=1e5, tau=1 is 6.44380...",
+      abs(worst - mpf('6.443800')) < mpf('1e-5'), f"value {float(worst):.6f}")
+check("coefficient <= 6.5 (printed constant of thm:main)", worst <= mpf('6.5'))
 check("coefficient decreasing in n",
       all(coeff(mpf(10) ** a, mpf(1)) > coeff(mpf(10) ** (a + 1), mpf(1))
           for a in range(5, 40)))
 check("coefficient decreasing in tau",
       all(coeff(mpf('1e5'), mpf(2) ** r) > coeff(mpf('1e5'), mpf(2) ** (r + 1))
           for r in range(0, 12)))
-check("modulus admissibility needs only log^2 n > 9 c_0 / beta = 66.71...",
-      mlog(mpf('1e5')) ** 2 > 9 * c0 / BETA,
-      f"9c_0/beta = {float(9*c0/BETA):.2f}, log^2(1e5) = {float(mlog(mpf('1e5'))**2):.2f}")
+check("modulus admissibility needs only log^2 n > 6 c_0 / beta = 44.48...",
+      mlog(mpf('1e5')) ** 2 > 6 * c0 / BETA,
+      f"6c_0/beta = {float(6*c0/BETA):.2f}, log^2(1e5) = {float(mlog(mpf('1e5'))**2):.2f}")
 
 # rmk:elementary: what carrying the bracket at x = n rather than at x = 1e5 would gain.
 check("rmk:elementary: further gain in the constant is beta/(5/(8 pi)) = 2.00...",
@@ -196,9 +203,9 @@ check("rmk:elementary: further gain in the constant is beta/(5/(8 pi)) = 2.00...
 
 # cor:even's chain is uniform in r: the only numeric step is
 #   7.0 * 2^(r/2) * log n > 1  for n >= 1e5, worst case r = 0.
-check("cor:even key step: 7.0 log(1e5) > 1 (worst case r = 0)",
-      mpf('7.0') * mlog(mpf('1e5')) > 1,
-      f"value {float(mpf('7.0') * mlog(mpf('1e5'))):.2f}")
+check("cor:even key step: 6.5 log(1e5) > 1 (worst case r = 0)",
+      mpf('6.5') * mlog(mpf('1e5')) > 1,
+      f"value {float(mpf('6.5') * mlog(mpf('1e5'))):.2f}")
 # and a witness that the SUPERSEDED table-dependent constant 0.072 was untenable:
 # C_Artin * Pi_r decreases to 0, and already dips below 0.072 at r = 12.
 _pi = Fraction(1)
@@ -208,6 +215,60 @@ for _t in range(12):
 _A12 = mpf('0.3739558136192023') * mpf(_pi.numerator) / mpf(_pi.denominator)
 check("C_Artin*Pi_12 < 0.072 (so no fixed positive constant can serve all r)",
       _A12 < mpf('0.072'), f"value {float(_A12):.7f}")
+
+
+# ------------------------------------------------------------------ lem:tail --
+# The split point lambda of lem:tail is a free parameter.  Two things are checked:
+# the closing inequality eq:lamcheck at the chosen lambda = 3/10, and the
+# optimality claim of rmk:splitpoint.
+print("\nlem:tail  (split point lambda = 3/10)")
+
+LAM = mpf(3) / 10
+Aof = lambda lam: 1 + 2 / (1 - 2 * lam)
+check("A(lambda) = 1 + 2/(1-2 lambda) is 6 at lambda = 3/10, and 9 at 3/8",
+      Aof(LAM) == 6 and Aof(mpf(3) / 8) == 9)
+
+lamcheck = lambda n, lam: (1 - mpf('0.5') * n ** (-lam)) ** (-1) \
+                          + n ** (lam - mpf('0.5')) + n ** (2 * lam - 1)
+check("eq:lamcheck holds at lambda = 3/10, n = 1e5",
+      lamcheck(mpf('1e5'), LAM) <= 2,
+      f"value {float(lamcheck(mpf('1e5'), LAM)):.6f}")
+check("eq:lamcheck decreases in n, so n = 1e5 is the only case needing checking",
+      all(lamcheck(mpf(10) ** a, LAM) > lamcheck(mpf(10) ** (a + 1), LAM)
+          for a in range(5, 60)))
+check("each of its three terms decreases separately (lambda < 1/2)",
+      all(f(mpf(10) ** a) > f(mpf(10) ** (a + 1)) for a in range(5, 40)
+          for f in ((lambda n: (1 - mpf('0.5') * n ** (-LAM)) ** (-1)),
+                    (lambda n: n ** (LAM - mpf('0.5'))),
+                    (lambda n: n ** (2 * LAM - 1)))))
+
+# rmk:splitpoint: the assembled coefficient as a function of the cut.
+def coeff_at(lam, n=mpf('1e5'), tau=mpf(1)):
+    Al = Aof(lam)
+    return (2 * (Al * c0 * BETA) ** mpf('0.5')
+            + 2 / (n ** (lam - mpf('0.25')) * tau ** mpf('0.5'))
+            + 2 * (Al * c0 / BETA) ** mpf('0.5') / (n ** mpf('0.5') * mlog(n)))
+
+check("coeff_at reproduces the assembled coefficient at lambda = 3/10",
+      abs(coeff_at(LAM) - worst) < mpf('1e-30'))
+check("the superseded cut lambda = 3/8 assembles 6.98884... (hence printed 7.0)",
+      abs(coeff_at(mpf(3) / 8) - mpf('6.988837')) < mpf('1e-5'),
+      f"value {float(coeff_at(mpf(3)/8)):.6f}")
+
+_grid = [mpf(i) / 1000 for i in range(251, 400)]
+_opt = min(_grid, key=coeff_at)
+check("the optimum cut lies near lambda = 0.308, with value 6.4364...",
+      abs(_opt - mpf('0.308')) <= mpf('0.002')
+      and abs(coeff_at(_opt) - mpf('6.43640')) < mpf('1e-4'),
+      f"argmin {float(_opt):.3f}, value {float(coeff_at(_opt)):.6f}")
+check("lambda = 3/10 costs under 0.008 against the optimum, and A = 6 is exact",
+      coeff_at(LAM) - coeff_at(_opt) < mpf('0.008'),
+      f"excess {float(coeff_at(LAM) - coeff_at(_opt)):.6f}")
+check("every cut in 0.29 <= lambda <= 0.33 still prints 6.5",
+      all(coeff_at(mpf(i) / 1000) <= mpf('6.5') for i in range(290, 331)))
+check("thresholds gain the fourth power (7.0/6.5)^4 = 1.3451...",
+      abs((mpf('7.0') / mpf('6.5')) ** 4 - mpf('1.34509')) < mpf('1e-4'),
+      f"value {float((mpf('7.0')/mpf('6.5'))**4):.5f}")
 
 # prop:largek(ii) uses the explicit divisor bound tau(m) <= C_4 m^(1/4) with
 # C_4 = 8.5.  This is certified as an exact supremum, not spot-checked: the function

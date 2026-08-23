@@ -6,7 +6,7 @@ The criterion of cor:positivity is
 
     n^{1/4}  >  K_r * log n,        K_r := C * 2^{r/2} / (C_Artin * Pi_r),
 
-with C = 7.0 the constant of thm:main, r = omega(k), and
+with C = 6.5 the constant of thm:main, r = omega(k), and
 
     Pi_r := prod_{t=1}^{r} (1 - 1/(q_t - 1)),   q_1 < q_2 < ... the odd primes.
 
@@ -35,10 +35,12 @@ mp.dps = 60
 # Every input is stated exactly, with its provenance, so that a reader can check
 # the certificate against the paper without re-deriving anything.
 #
-#   C          thm:main's error constant, 7.0.  The proof of thm:main
-#              assembles 6.98859..., and 7.0 is its round-up; rounding the
-#              constant UP makes K_r larger, the criterion harder, and every
-#              threshold larger, i.e. safe.
+#   C          thm:main's error constant, 6.5.  The proof of thm:main
+#              assembles 6.44380... at the split point lambda = 3/10 of
+#              lem:tail, and 6.5 is its round-up; rounding the constant UP
+#              makes K_r larger, the criterion harder, and every threshold
+#              larger, i.e. safe.  (The earlier cut lambda = 3/8 assembled
+#              6.98884... and printed 7.0; see rmk:splitpoint.)
 #   CARTIN_LO  strict LOWER bound for Artin's constant 0.3739558136...
 #              (Wrench, Math. Comp. 15 (1961) 396-398).  Using a lower bound
 #              makes K_r larger, i.e. the criterion harder, i.e. safe.
@@ -48,7 +50,7 @@ mp.dps = 60
 # The criterion also involves c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6)) through
 # thm:main's constant, but c_0 does not appear here directly: it is already
 # folded into C.
-C = Fraction(70, 10)                  # thm:main constant, exact
+C = Fraction(65, 10)                  # thm:main constant, exact
 CARTIN_LO = Fraction(3739558, 10**7)  # strict lower bound for Artin's constant
 RMAX = 12
 
@@ -84,9 +86,9 @@ def crossover(r, plus1=True):
 
     With plus1 (the default) this solves cor:even's strengthened form
     n^{1/4} > K_r log n + 1, which is what the printed thresholds must satisfy:
-    at C = 7.0 the plain crossing rounded up to 3 s.f. no longer leaves room
-    for the +1 at r = 4 and r = 5, so solving the weaker form and asserting the
-    stronger one afterwards would fail there.
+    at these constants the plain crossing rounded up to 3 s.f. need not leave
+    room for the +1, so solving the weaker form and asserting the stronger one
+    afterwards can fail.
     """
     K = K_up(r)
     f = lambda n: n ** mpf('0.25') - K * mlog(n) - (1 if plus1 else 0)
@@ -127,13 +129,13 @@ def certify(r):
 # need the cor:positivity value at every r.  Each is re-derived and asserted, so
 # this file fails loudly if the paper and the code drift apart.
 TABLE_1 = {
-    3:  (Fraction(5, 16),           105,                 1.20, 15),
-    4:  (Fraction(9, 32),           1155,                9.18, 15),
-    5:  (Fraction(33, 128),         15015,               6.39, 16),
-    6:  (Fraction(495, 2048),       255255,              3.98, 17),
-    7:  (Fraction(935, 4096),       4849845,             2.38, 18),
-    8:  (Fraction(1785, 8192),      111546435,           1.35, 19),
-    9:  (Fraction(6885, 32768),     3234846615,          7.22, 19),
+    3:  (Fraction(5, 16),           105,                 8.57, 14),
+    4:  (Fraction(9, 32),           1155,                6.58, 15),
+    5:  (Fraction(33, 128),         15015,               4.59, 16),
+    6:  (Fraction(495, 2048),       255255,              2.87, 17),
+    7:  (Fraction(935, 4096),       4849845,             1.72, 18),
+    8:  (Fraction(1785, 8192),      111546435,           9.70, 18),
+    9:  (Fraction(6885, 32768),     3234846615,          5.22, 19),
     10: (Fraction(13311, 65536),    100280245065,        1.01, 22),
     11: (Fraction(51765, 262144),   3710369067405,       1.38, 25),
     12: (Fraction(403767, 2097152), 152125131763605,     2.32, 28),
@@ -179,7 +181,7 @@ if __name__ == '__main__':
     print("strengthened criterion of cor:even.")
 
     # ---------------------------------------------------------------------
-    # cor:uniform: the uniform threshold N_0 = 7.22e19.
+    # cor:uniform: the uniform threshold N_0 = 5.22e19.
     #
     # Two halves.  (a) For r <= 9 the least admissible n is increasing in r,
     # so it is at most its value at r = 9, which is N_0 itself.  (b) For
@@ -200,12 +202,12 @@ if __name__ == '__main__':
     cas_check("K_r is increasing in r (so the least admissible n is too)",
               all(K_up(r) < K_up(r + 1) for r in range(0, 60)))
     worst = max(crossover(r) for r in range(0, 10))
-    cas_check("every crossing for r <= 9 is at most N_0 = 7.22e19",
+    cas_check("every crossing for r <= 9 is at most N_0 = 5.22e19",
               worst <= N0, f"worst is r=9 at {float(worst):.4g}")
     cas_check("N_0 lies below the r=10 row of Table 1 (1.01e22)", N0 < mpf('1.01e22'))
 
     # base case and induction for the r >= 10 half
-    C55 = mpf('7.0') / mpf('0.2054')     # >= 7.0/(C_Artin * log3/2), by lem:mertens
+    C55 = mpf('6.5') / mpf('0.2054')     # >= 6.5/(C_Artin * log3/2), by lem:mertens
 
     def P(r):
         v = 1
@@ -237,5 +239,5 @@ if __name__ == '__main__':
         for f in cas:
             print("  ! " + f)
         raise SystemExit(1)
-    print("\nN_0 = 7.22e19 certified for cor:uniform.")
+    print("\nN_0 = 5.22e19 certified for cor:uniform.")
     raise SystemExit(0)

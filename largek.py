@@ -9,17 +9,17 @@ smaller -- admitting k almost as large as n.  The paper leaves its thresholds
 effective but uncomputed; this script computes them.
 
 PART I  (prop:largek(i), fixed r).  Take the CONSTANT level
-z = 45 c_0 / delta_r, for which the tail term 9 c_0 n / z of eq:master is exactly
+z = 30 c_0 / delta_r, for which the tail term 6 c_0 n / z of eq:master is exactly
 delta_r n / 5 and the constraint z^2 k <= n reads k <= kappa_r n with
-kappa_r := (delta_r / (45 c_0))^2.  Writing delta_r = C_Artin * Pi_r and
+kappa_r := (delta_r / (30 c_0))^2.  Writing delta_r = C_Artin * Pi_r and
 tau = 2^r, positivity needs
 
-    (4/5) delta_r n  >  2 n^{5/8} log n + z tau sqrt(n) (log n)^2 + 2 z tau log n,
+    (4/5) delta_r n  >  2 n^{7/10} log n + z tau sqrt(n) (log n)^2 + 2 z tau log n,
 
-together with the hypotheses of eq:master -- n >= 1e5 and 1 <= z <= n^{3/8} -- and
+together with the hypotheses of eq:master -- n >= 1e5 and 1 <= z <= n^{3/10} -- and
 k_r <= kappa_r n so that an admissible k exists at all (k_r = odd primorial).
 
-PART II  (prop:largek(ii), uniform in r).  Take z = (45 c_0 / 0.2054)
+PART II  (prop:largek(ii), uniform in r).  Take z = (30 c_0 / 0.2054)
 log y(k), for which the tail term is delta(k) n / 5 with
 delta(k) = 0.2054 / log y(k).  Bounding y(k) by eq:ybound, tau(k) by the divisor
 bound eq:taubound, and requiring the three remaining terms of eq:master to fall below
@@ -40,6 +40,10 @@ Every floating step is directed so the reported constants are certified:
 In both parts the left side is linear in n and the right side is
 O(n^{3/4} log^2 n), so verifying at the threshold certifies every larger n.
 
+The coefficient 30 = 5A comes from the split point lambda = 3/10 of lem:tail,
+at which A = 1 + 2/(1 - 2 lambda) = 6 is the coefficient of c_0 n / z in
+eq:master.  The earlier cut lambda = 3/8 gave A = 9 and the coefficient 45.
+
 Requires: mpmath, sympy.  Run:  python3 largek.py
 """
 from mpmath import mp, mpf, log as mlog, floor as mfloor, ceil as mceil, zeta
@@ -53,7 +57,7 @@ from thresholds import ODD, pi_r, k_min, CARTIN_LO, TABLE_1, RMAX
 #   C0_UP      strict UPPER bound for c_0 = zeta(2)^2 zeta(3)/(zeta(4) zeta(6))
 #              = 2.953912... (lem:ramare).  c_0 enters only through z, and a
 #              larger z makes both the error side and admissibility harder.
-#   A          the coefficient (45 c_0 / 0.2054) of log y(k) in Part II's z,
+#   A          the coefficient (30 c_0 / 0.2054) of log y(k) in Part II's z,
 #              where 0.2054 is the lower bound of prop:singlower(ii).
 #   TAU_C      the divisor-bound constant of eq:taubound: tau(m) <= 8.5 m^{1/4}.
 #   THETA_C    Rosser-Schoenfeld: theta(y) > 0.84 y for y >= 101, used in eq:ybound.
@@ -61,17 +65,20 @@ UP = 1 + mpf(10) ** (-40)
 DN = 1 - mpf(10) ** (-40)
 
 C0_UP = (zeta(2) ** 2 * zeta(3) / (zeta(4) * zeta(6))) * UP
-A = 45 * C0_UP / mpf('0.2054')
+A = 30 * C0_UP / mpf('0.2054')
 TAU_C = mpf('8.5')
-BETA = mpf('0.39852')          # constant of lem:grh; scales the GRH remainder in eq:master
+BETA = mpf('0.39854')          # constant of lem:grh; scales the GRH remainder in eq:master
 THETA_C = mpf('0.84')
 
 # Constants AS PRINTED IN THE PAPER.  Re-derived and asserted below, so this
 # file fails loudly if the paper and the code drift apart.
-PROP_52_I = {10: (7.37, 20), 11: (3.77, 21), 12: (1.90, 22)}
-PROP_52_II_N = (1.01, 40)
-PROP_52_II_C3 = mpf('4.54e5')
-PROP_52_II_C2 = mpf('673.2')      # printed C_2', with C_3 = C_2'^2 <= 4.53e5
+PROP_52_I = {10: (3.05, 20), 11: (1.57, 21), 12: (7.87, 21)}
+# the k-range column of Table 1, printed as kappa_r n.  These must be LOWER bounds
+# for the certified kappa_r, so the tabulated range is contained in the proved one.
+PROP_52_I_KAPPA = {10: mpf('7.34e-7'), 11: mpf('6.94e-7'), 12: mpf('6.60e-7')}
+PROP_52_II_N = (1.65, 39)
+PROP_52_II_C3 = mpf('2.02e5')
+PROP_52_II_C2 = mpf('448.9')      # printed C_2', with C_3 = C_2'^2 <= 2.02e5
 
 
 def round_up_3sf(x):
@@ -90,20 +97,20 @@ def delta_lo(r):
 
 
 def z_const_up(r):
-    """The constant truncation level z = 45 c_0 / delta_r, rounded UP."""
-    return 45 * C0_UP / delta_lo(r) * UP
+    """The constant truncation level z = 30 c_0 / delta_r, rounded UP."""
+    return 30 * C0_UP / delta_lo(r) * UP
 
 
 def kappa_lo(r):
-    """kappa_r = (delta_r / (45 c_0))^2, rounded DOWN."""
-    return (delta_lo(r) / (45 * C0_UP)) ** 2 * DN
+    """kappa_r = (delta_r / (30 c_0))^2, rounded DOWN."""
+    return (delta_lo(r) / (30 * C0_UP)) ** 2 * DN
 
 
 def slack_I(n, r):
     """LHS (down) minus RHS (up) of Part I's positivity inequality."""
     z, tau = z_const_up(r), mpf(2) ** r
     lhs = mpf('0.8') * delta_lo(r) * n * DN
-    rhs = (2 * n ** mpf('0.625') * mlog(n)
+    rhs = (2 * n ** mpf('0.7') * mlog(n)
            + BETA * z * tau * n ** mpf('0.5') * mlog(n) ** 2
            + 2 * z * tau * mlog(n)) * UP
     return lhs - rhs
@@ -127,7 +134,7 @@ def certify_I(r):
     n_r = m * mpf(10) ** e
     checks = {
         'positivity holds at n_r':        slack_I(n_r, r) > 0,
-        'z <= n_r^{3/8}  (lem:tail)':    z_const_up(r) <= n_r ** mpf('0.375'),
+        'z <= n_r^{3/10} (lem:tail)':    z_const_up(r) <= n_r ** mpf('0.3'),
         'z >= 1          (Prop. 4.2)':    z_const_up(r) >= 1,
         'n_r >= 1e5      (lem:tail)':    n_r >= mpf('1e5'),
         'an admissible k exists':         mpf(k_min(r)) <= kappa_lo(r) * n_r,
@@ -157,7 +164,7 @@ def delta_k_lo(n):
 def slack_II(n):
     z, tau = z_var_up(n), TAU_C * n ** mpf('0.25') * UP
     lhs = delta_k_lo(n) * n / 5 * DN
-    rhs = (2 * n ** mpf('0.625') * mlog(n)
+    rhs = (2 * n ** mpf('0.7') * mlog(n)
            + BETA * z * tau * n ** mpf('0.5') * mlog(n) ** 2
            + 2 * z * tau * mlog(n)) * UP
     return lhs - rhs
@@ -179,7 +186,7 @@ def certify_II():
     C3 = C3[0] * mpf(10) ** C3[1]
     checks = {
         'positivity holds at N':       slack_II(N) > 0,
-        'z(N) <= N^{3/8}':             z_var_up(N) <= N ** mpf('0.375'),
+        'z(N) <= N^{3/10}':            z_var_up(N) <= N ** mpf('0.3'),
         'z(N) >= 1':                   z_var_up(N) >= 1,
         'C_3 (loglog n)^2 >= z(n)^2':  all(
             C3 * mlog(mlog(N * mpf(10) ** j)) ** 2 >= z_var_up(N * mpf(10) ** j) ** 2
@@ -204,6 +211,10 @@ if __name__ == '__main__':
         if r in PROP_52_I and (float(m), e) != PROP_52_I[r]:
             failures.append(f"prop:largek(i), r={r}: certified n_r is {float(m)}e{e}, "
                             f"paper prints {PROP_52_I[r][0]}e{PROP_52_I[r][1]}")
+        if r in PROP_52_I_KAPPA and not PROP_52_I_KAPPA[r] <= kappa_lo(r):
+            failures.append(f"prop:largek(i), r={r}: table prints kappa_r = "
+                            f"{float(PROP_52_I_KAPPA[r]):.3g}, which exceeds the certified "
+                            f"{float(kappa_lo(r)):.6g}")
         t1 = mpf(TABLE_1[r][2]) * mpf(10) ** TABLE_1[r][3]
         print(f"{r:>3} {float(kappa_lo(r)):>12.3e} {float(z_const_up(r)):>9.1f} "
               f"{float(m):>6.2f}e{e:<5} {float(t1):>11.3g} {float(t1 / n_r):>11.2f} "
